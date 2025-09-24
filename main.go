@@ -35,36 +35,40 @@ func getSlice() []int {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Enter numbers separated by comma: ")
 
-	// read input line
-	input, _ := reader.ReadString('\n')
-	input = strings.TrimSpace(input)
+	for {
+		input, _ := reader.ReadString('\n')
+		input = strings.TrimSpace(input)
 
-	// split by comma
-	parts := strings.Split(input, ",")
+		parts := strings.Split(input, ",")
+		var numbers []int
 
-	// convert to slice of ints
-	var numbers []int
-	for _, p := range parts {
-		n, err := strconv.Atoi(strings.TrimSpace(p))
-		if err == nil {
-			numbers = append(numbers, n)
-		} else {
-			fmt.Println("Invalid number:", p)
+		for _, p := range parts {
+			if n, err := strconv.Atoi(strings.TrimSpace(p)); err == nil {
+				numbers = append(numbers, n)
+			} else {
+				fmt.Println("Invalid number:", p)
+			}
 		}
+
+		if len(numbers) == 0 {
+			fmt.Println("No valid numbers entered. Please try again.")
+			continue
+		}
+		return numbers
 	}
-	return numbers
 }
 
 func getResult(operation string, numbers []int) float64 {
-	result := 0.0
-	if operation == "SUM" {
-		result = float64(sum(numbers))
-	} else if operation == "AVG" {
-		result = float64(avg(numbers))
-	} else if operation == "MED" {
-		result = float64(med(numbers))
+	switch operation {
+	case "SUM":
+		return float64(sum(numbers))
+	case "AVG":
+		return avg(numbers)
+	case "MED":
+		return med(numbers)
+	default:
+		return 0.0
 	}
-	return result
 }
 
 func sum(numbers []int) int {
