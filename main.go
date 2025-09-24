@@ -51,7 +51,7 @@ func getSlice() []int {
 		}
 
 		if len(numbers) == 0 {
-			fmt.Println("No valid numbers entered. Please try again.")
+			fmt.Print("Enter numbers separated by comma: ")
 			continue
 		}
 		return numbers
