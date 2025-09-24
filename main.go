@@ -18,44 +18,47 @@ func main() {
 }
 
 func getOperation() string {
-	var operation string
 	for {
 		fmt.Print("Enter operation (AVG, SUM, MED): ")
-		fmt.Scanln(&operation)
-		if operation == "AVG" || operation == "SUM" || operation == "MED" {
-			return operation
-		} else {
+		var op string
+		fmt.Scanln(&op)
+
+		switch op {
+		case "AVG", "SUM", "MED":
+			return op
+		default:
 			fmt.Println("Invalid operation. Please enter AVG, SUM, or MED.")
-			continue
 		}
 	}
 }
 
 func getSlice() []int {
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Enter numbers separated by comma: ")
 
 	for {
+		fmt.Print("Enter numbers separated by comma: ")
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
 
-		parts := strings.Split(input, ",")
-		var numbers []int
-
-		for _, p := range parts {
-			if n, err := strconv.Atoi(strings.TrimSpace(p)); err == nil {
-				numbers = append(numbers, n)
-			} else {
-				fmt.Println("Invalid number:", p)
-			}
+		if numbers, err := parseNumbers(input); err == nil {
+			return numbers
+		} else {
+			fmt.Println(err)
 		}
-
-		if len(numbers) == 0 {
-			fmt.Print("Enter numbers separated by comma: ")
-			continue
-		}
-		return numbers
 	}
+}
+
+func parseNumbers(input string) ([]int, error) {
+	parts := strings.Split(input, ",")
+	var numbers []int
+	for _, p := range parts {
+		n, err := strconv.Atoi(strings.TrimSpace(p))
+		if err != nil {
+			return nil, fmt.Errorf("invalid number: %s", p)
+		}
+		numbers = append(numbers, n)
+	}
+	return numbers, nil
 }
 
 func getResult(operation string, numbers []int) float64 {
@@ -66,46 +69,34 @@ func getResult(operation string, numbers []int) float64 {
 		return avg(numbers)
 	case "MED":
 		return med(numbers)
-	default:
-		return 0.0
 	}
+	panic("unsupported operation: " + operation)
 }
 
 func sum(numbers []int) int {
-	result := 0
+	total := 0
 	for _, num := range numbers {
-		result += num
+		total += num
 	}
-	return result
+	return total
 }
 
 func avg(numbers []int) float64 {
-	result := 0.0
-	sum := 0
-	for _, num := range numbers {
-		sum += num
-	}
-	result = float64(sum) / float64(len(numbers))
-	return result
+	return float64(sum(numbers)) / float64(len(numbers))
 }
 
 func med(numbers []int) float64 {
 	if len(numbers) == 0 {
-		return 0 // or panic, depending on your use case
+		return 0
 	}
-
-	// Copy slice to avoid modifying the original
-	sorted := make([]int, len(numbers))
-	copy(sorted, numbers)
+	sorted := append([]int(nil), numbers...) // copy
 	sort.Ints(sorted)
 
 	n := len(sorted)
 	mid := n / 2
 
 	if n%2 == 0 {
-		// even length → average of two middle elements
 		return float64(sorted[mid-1]+sorted[mid]) / 2.0
 	}
-	// odd length → middle element
 	return float64(sorted[mid])
 }
